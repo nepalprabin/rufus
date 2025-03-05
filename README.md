@@ -50,6 +50,7 @@ git clone https://github.com/nepalprabin/rufus.git cd rufus
     HF_TOKEN=your_huggingface_token
     OPENAI_API_KEY=your_openai_api_key
     OPENAI_API_BASE=https://api.openai.com/v1
+    RUFUS_API_KEY=rufus_api_key
     ```
 
     **Run Rufus**
