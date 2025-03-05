@@ -10,6 +10,7 @@ class Config:
     HF_TOKEN = os.getenv("HF_TOKEN")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
     OPENAI_API_BASE = os.getenv("OPENAI_API_BASE")
+    RUFUS_API_KEY = os.getenv("RUFUS_API_KEY")
     
     # Default settings
     DEFAULT_MODEL = "Qwen/Qwen2.5-Coder-32B-Instruct"
