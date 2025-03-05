@@ -3,7 +3,7 @@ from typing import Dict
 class DocumentSynthesizerTool(Tool):
     name = "document_synthesizer_tool"
     description = """
-    Synthesizes extracted content into structured documents ready for RAG systems.
+    Synthesizes extracted content into structured documents.
     """
     inputs = {
         "relevant_content": {"type": "any", "description": "Dictionary of relevant content"},
