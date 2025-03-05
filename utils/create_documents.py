@@ -1,62 +1,74 @@
-import json
-from typing import List, Dict, Any
+from typing import Union, Dict, List
 from langchain_core.documents import Document
+import json
 
-def rufus_to_langchain_documents(rufus_result: Dict[str, Any]) -> List[Document]:
+
+def rufus_to_langchain_documents(rufus_output: Union[str, Dict]) -> List[Document]:
     """
-    Convert Rufus scraping results to a list of Langchain Document objects.
+    Convert Rufus JSON output to a list of Langchain Document objects.
+    Handles the nested JSON structure where content contains another JSON string.
     
     Args:
-        rufus_result: The result dictionary from client.scrape()
+        rufus_output: The JSON output from Rufus (either as a string or parsed dict)
         
     Returns:
-        List of Langchain Document objects
+        A list of Langchain Document objects
     """
-    # Get the content field which contains the JSON string
-    content_str = rufus_result.get("content", "{}")
+    # Parse JSON if it's a string
+    if isinstance(rufus_output, str):
+        try:
+            outer_json = json.loads(rufus_output)
+        except json.JSONDecodeError:
+            raise ValueError("Invalid JSON format in input")
+    else:
+        outer_json = rufus_output
     
-    # Parse the JSON string
+    # Extract the inner JSON from the content field
+    content_str = outer_json.get("content", "{}")
+    
+    # Parse the inner JSON
     try:
-        # If content is already a dictionary, use it directly
-        if isinstance(content_str, dict):
-            content_data = content_str
+        if isinstance(content_str, str):
+            inner_json = json.loads(content_str)
         else:
-            content_data = json.loads(content_str)
+            inner_json = content_str
     except json.JSONDecodeError:
-        # Handle case where content isn't valid JSON
-        print("Error: Could not parse JSON content")
+        print("Error parsing inner JSON content")
         return []
     
-    # Extract sections
-    sections = content_data.get("sections", [])
+    documents = []
+    
+    # Extract sections from the inner JSON
+    sections = inner_json.get("sections", [])
     
     # Create a Document for each section
-    documents = []
     for section in sections:
-        # Get section metadata
+        # Extract section metadata
         title = section.get("title", "Untitled")
         url = section.get("url", "")
         relevance_score = section.get("relevance_score", 0.0)
         
-        # Get section content
-        paragraphs = section.get("content", [])
-        
-        # Join paragraphs into a single text
-        text_content = "\n\n".join(paragraphs)
+        # Combine content paragraphs into a single text
+        # Some sections might have content as a string instead of a list
+        content_items = section.get("content", [])
+        if isinstance(content_items, list):
+            content = "\n\n".join(content_items)
+        else:
+            content = str(content_items)
         
         # Create metadata dictionary
         metadata = {
             "title": title,
             "url": url,
             "relevance_score": relevance_score,
+            "prompt": inner_json.get("prompt", ""),
             "source": "rufus_crawler",
-            "prompt": content_data.get("prompt", ""),
-            "created_at": content_data.get("created_at", "")
+            "created_at": inner_json.get("created_at", "")
         }
         
-        # Create Document
+        # Create Langchain Document
         doc = Document(
-            page_content=text_content,
+            page_content=content,
             metadata=metadata
         )
         
