@@ -10,19 +10,9 @@ Rufus is an AI-driven web crawler designed to intelligently navigate websites an
 - Document Synthesis: Organizes extracted content into structured documents ready for RAG systems.
 - Multiple Output Formats: Supports both markdown and JSON output formats.
 
-# Installation
-
-1.  Clone the repository:
-
-```html
-git clone https://github.com/nepalprabin/rufus.git cd rufus
-```
-
-2.  Create a virtual en
-
 ## **Setup Environment**
 
-1.  Clone the repository or create a new project directory:
+1.  Clone the repository:
 
     ```
     git clone https://github.com/nepalprabin/rufus.git
@@ -33,7 +23,7 @@ git clone https://github.com/nepalprabin/rufus.git cd rufus
 
     ```
     python -m venv venv
-    source venv/bin/activate  # On Windows: venv\Scripts\activat
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
     ```
 
 3.  Install the dependencies:
@@ -56,7 +46,7 @@ git clone https://github.com/nepalprabin/rufus.git cd rufus
 
 <!-- -->
 
-1.  Create a Python script:
+2.  Run the Python script:
 
     ```
     from client import RufusClient
