@@ -16,7 +16,7 @@ class RufusClient:
         
         Args:
             api_key: Rufus API key for authentication
-            model: Model identifier to use (defaults to Qwen/Qwen2.5-Coder-32B-Instruct)
+            model: Model identifier to use
         """
         # Validate Rufus API key
         self.api_key = api_key
