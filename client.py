@@ -1,9 +1,10 @@
 # rufus/client.py
 import os
 from typing import Dict, List, Optional, Union
-from smolagents import CodeAgent, HfApiModel, OpenAIServerModel
+from smolagents import CodeAgent, OpenAIServerModel
 from tools import WebCrawlerTool, ContentExtractionTool, RelevanceEvaluationTool, DocumentSynthesizerTool
 from  config import Config
+from utils.create_documents import rufus_to_langchain_documents
 
 
 class RufusClient:
@@ -21,13 +22,6 @@ class RufusClient:
         self.api_key = api_key
         if not self._validate_rufus_key(api_key):
             raise ValueError("Invalid Rufus API key")
-            
-        # self.model_name = model
-        
-        # Set environment variables for underlying services
-        # These would be managed internally based on the Rufus key
-        # os.environ["HF_TOKEN"] = Config.HF_TOKEN
-        # os.environ["OPENAI_API_KEY"] = Config.OPENAI_API_KEY
         
         # Initialize the agent on first use (lazy loading)
         self._agent = None
@@ -37,31 +31,6 @@ class RufusClient:
         if key == Config.RUFUS_API_KEY:
             return True
         return False
-    
-    
-# class RufusClient:
-#     """Client for the Rufus web crawler."""
-    
-    # def __init__(self, api_key: str = None, model: str = None):
-    #     """
-    #     Initialize the Rufus client.
-        
-    #     Args:
-    #         api_key: API key for the model service (OpenAI, Hugging Face, etc.)
-    #         model: Model identifier to use (defaults to Qwen/Qwen2.5-Coder-32B-Instruct)
-    #     """
-    #     self.api_key = api_key
-    #     self.model_name = model
-        
-    #     # Set environment variables if API key is provided
-    #     if api_key:
-    #         if model and ("openai" in model.lower() or "gpt" in model.lower()):
-    #             os.environ["OPENAI_API_KEY"] = api_key
-    #         else:
-    #             os.environ["HF_TOKEN"] = api_key
-        
-    #     # Initialize the agent on first use (lazy loading)
-    #     self._agent = None
     
     @property
     def agent(self):
@@ -83,16 +52,6 @@ class RufusClient:
                     model_id="gpt-4o",
                     api_key=Config.OPENAI_API_KEY
                 )
-        # if self.model_name:
-        #     if "openai" in self.model_name.lower() or "gpt" in self.model_name.lower():
-        #         model = OpenAIServerModel(
-        #             model_id="gpt-4o",
-        #             api_key=self.api_key
-        #         )
-        #     else:
-        #         model = HfApiModel(model_id=self.model_name)
-        # else:
-        #     model = HfApiModel(model_id="Qwen/Qwen2.5-Coder-32B-Instruct")
         
         # Create the agent
         agent = CodeAgent(
@@ -126,9 +85,9 @@ class RufusClient:
         Extract information from the website {url} based on this prompt: "{prompt}"
         
         Follow these steps:
-        1. Crawl the website starting from the given URL                                                                                                                                                                       │
-        2. Extract clean, readable content from the HTML                                                                                                                                                                       │
-        3. Evaluate the relevance of each page to the prompt                                                                                                                                                                   │
+        1. Crawl the website starting from the given URL
+        2. Extract clean, readable content from the HTML
+        3. Evaluate the relevance of each page to the prompt
         4. Synthesize the relevant content into a structured document in {output_format} format  
         
         Return the final document.
@@ -141,5 +100,5 @@ class RufusClient:
         if save_to and isinstance(result, dict) and "content" in result:
             with open(save_to, "w", encoding="utf-8") as f:
                 f.write(result["content"])
-        
-        return result
+        documents = rufus_to_langchain_documents(result)
+        return documents
